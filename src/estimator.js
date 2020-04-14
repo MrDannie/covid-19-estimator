@@ -1,18 +1,57 @@
-const covid19ImpactEstimator = ($input) => {
-  let output = {
+function getEstimateForImpactCases(noOfReportedCases) {
+  const currentlyInfected = noOfReportedCases * 10;
+  return currentlyInfected;
+}
+
+function getEstimateForSevereCases(noOfReportedCases) {
+  const currentlyInfected = noOfReportedCases * 50;
+  return currentlyInfected;
+}
+
+const convertToDays = (period, periodType) => {
+  if (periodType === 'days') {
+    return period;
+  } if (periodType === 'weeks') {
+    return period * 7;
+  } if (periodType === 'months') {
+    return period * 30;
+  } return 0;
+};
+
+class ImpactComputors {
+  static getInfectionsForATime(currentlyInfected, period, periodType) {
+    const days = convertToDays(period, periodType);
+    const infectionsByRequestedTime = currentlyInfected * (2 ** Math.floor(days / 3));
+    return infectionsByRequestedTime;
+  }
+
+  static estimatePossibleSevereCases(infectionsByRequestedTime) {
+    const severeCasesByRequestedTime = (15 / 100) * infectionsByRequestedTime;
+    return severeCasesByRequestedTime;
+  }
+
+  static estimateAvailableBeds(severeCases, totalHospitalBeds) {
+    const availaibleBeds = Math.round((35 / 100) * totalHospitalBeds) - severeCases;
+    return availaibleBeds;
+  }
+}
+const normal = new ImpactComputors();
+
+const covid19ImpactEstimator = (data) => {
+  const output = {
     data: {},
     impact: {},
     severeImpact: {}
   };
 
-  output.impact.currentlyInfected = normal.getEstimateForImpactCases(
-    $input.reportedCases
+  output.impact.currentlyInfected = getEstimateForImpactCases(
+    data.reportedCases
   );
 
   output.impact.infectionsByRequestedTime = normal.getInfectionsForATime(
     output.impact.currentlyInfected,
-    $input.timeToElapse,
-    $input.periodType
+    data.timeToElapse,
+    data.periodType
   );
 
   output.impact.severeCasesByRequestedTime = normal.estimatePossibleSevereCases(
@@ -21,92 +60,28 @@ const covid19ImpactEstimator = ($input) => {
 
   output.impact.hospitalBedsByRequestedTime = normal.estimateAvailableBeds(
     output.impact.severeCasesByRequestedTime,
-    $input.totalHospitalBeds
+    data.totalHospitalBeds
   );
 
-  output.severeImpact.currentlyInfected = severe.getEstimateForSevereCases(
-    $input.reportedCases
+  output.severeImpact.currentlyInfected = getEstimateForSevereCases(
+    data.reportedCases
   );
 
-  output.severeImpact.infectionsByRequestedTime = severe.getInfectionsForATime(
+  output.severeImpact.infectionsByRequestedTime = normal.getInfectionsForATime(
     output.severeImpact.currentlyInfected,
-    $input.timeToElapse,
-    $input.periodType
+    data.timeToElapse,
+    data.periodType
   );
 
-  output.severeImpact.severeCasesByRequestedTime = severe.estimatePossibleSevereCases(
+  output.severeImpact.severeCasesByRequestedTime = normal.estimatePossibleSevereCases(
     output.severeImpact.infectionsByRequestedTime
   );
 
-  output.severeImpact.hospitalBedsByRequestedTime = severe.estimateAvailableBeds(
+  output.severeImpact.hospitalBedsByRequestedTime = normal.estimateAvailableBeds(
     output.severeImpact.severeCasesByRequestedTime,
-    $input.totalHospitalBeds
+    data.totalHospitalBeds
   );
-  output.data = $input;
+  output.data = data;
   return output;
 };
-
-class normalImpactComputors {
-  getEstimateForImpactCases = (noOfReportedCases) => {
-    let currentlyInfected = noOfReportedCases * 10;
-    return currentlyInfected;
-  };
-
-  getInfectionsForATime = (currentlyInfected, period, periodType) => {
-    let days = convertToDays(period, periodType);
-    let infectionsByRequestedTime =
-      currentlyInfected * Math.pow(2, Math.floor(days / 3));
-    return infectionsByRequestedTime;
-  };
-
-  estimatePossibleSevereCases = (infectionsByRequestedTime) => {
-    const severeCasesByRequestedTime = (15 / 100) * infectionsByRequestedTime;
-    return severeCasesByRequestedTime;
-  };
-
-  estimateAvailableBeds = (severeCases, totalHospitalBeds) => {
-    const availaibleBeds =
-      Math.round((35 / 100) * totalHospitalBeds) - severeCases;
-    return availaibleBeds;
-  };
-}
-
-class severeImpactComputors {
-  getEstimateForSevereCases = (noOfReportedCases) => {
-    let currentlyInfected = noOfReportedCases * 50;
-    return currentlyInfected;
-  };
-
-  getInfectionsForATime = (currentlyInfected, period, periodType) => {
-    let days = convertToDays(period, periodType);
-    let infectionsByRequestedTime =
-      currentlyInfected * Math.pow(2, Math.floor(days / 3));
-    return infectionsByRequestedTime;
-  };
-
-  estimatePossibleSevereCases = (infectionsByRequestedTime) => {
-    const severeCasesByRequestedTime = (15 / 100) * infectionsByRequestedTime;
-    return severeCasesByRequestedTime;
-  };
-
-  estimateAvailableBeds = (severeCases, totalHospitalBeds) => {
-    const availaibleBeds =
-      Math.round((35 / 100) * totalHospitalBeds) - severeCases;
-    return availaibleBeds;
-  };
-}
-
-const normal = new normalImpactComputors();
-const severe = new severeImpactComputors();
-const convertToDays = (period, periodType) => {
-  if (periodType == 'days') {
-    return period;
-  } else if (periodType == 'weeks') {
-    period = period * 7;
-  } else {
-    period = period * 30;
-  }
-  return period;
-};
-covid19ImpactEstimator($input);
 export default covid19ImpactEstimator;

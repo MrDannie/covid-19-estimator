@@ -30,7 +30,7 @@ function estimatePossibleSevereCases(infectionsByRequestedTime) {
 }
 
 function estimateAvailableBeds(severeCases, totalHospitalBeds) {
-  const availaibleBeds = Math.round((35 / 100) * totalHospitalBeds) - severeCases;
+  const availaibleBeds = Math.trunc((35 / 100) * totalHospitalBeds) - severeCases;
   return availaibleBeds;
 }
 

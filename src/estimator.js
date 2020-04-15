@@ -20,7 +20,7 @@ const convertToDays = (period, periodType) => {
 
 function getInfectionsForATime(currentlyInfected, period, periodType) {
   const days = convertToDays(period, periodType);
-  const infectionsByRequestedTime = currentlyInfected * (2 ** Math.floor(days / 3));
+  const infectionsByRequestedTime = currentlyInfected * (2 ** Math.trunc(days / 3));
   return infectionsByRequestedTime;
 }
 
